@@ -2,6 +2,8 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, unquote
 import os
 import time
+from io import BytesIO
+from PIL import Image
 
 class ExfilImageServer(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -26,16 +28,16 @@ class ExfilImageServer(BaseHTTPRequestHandler):
                 self.log_message("    Dimensions: %sx%s", width, height)
                 self.log_message("    User-Agent: %s", self.headers.get('User-Agent'))
 
-                # PNG 1x1 transparent
+                # Create an image dynamically
+                img = Image.new("RGB", (int(width), int(height)), color=(255, 51, 255))  # white image
+                buffered = BytesIO()
+                img.save(buffered, format="PNG")
+                
+                # Send image
                 self.send_response(200)
                 self.send_header('Content-type', 'image/png')
                 self.end_headers()
-                self.wfile.write(
-                    b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01'
-                    b'\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89'
-                    b'\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01'
-                    b'\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
-                )
+                self.wfile.write(buffered.getvalue())
                 return
 
             self.send_error(404, "Not Found - Use /cve/[data]/width/height")
